@@ -18,10 +18,10 @@ lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   scalacOptions ++= List("-unchecked", "-deprecation", "-encoding", "UTF8")
 )
 
-val akkaHttpVersion       = "10.0.9"
+val akkaHttpVersion       = "10.0.10"
 val macWireVersion        = "2.3.0"
 val typesafeConfigVersion = "1.3.1"
-val pureConfigVersion     = "0.7.2"
+val pureConfigVersion     = "0.8.0"
 val betterFilesVersion    = "3.1.0"
 val hsqldbVersion         = "2.4.0"
 val hikariCPVersion       = "2.6.3"

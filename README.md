@@ -1,12 +1,15 @@
 ### Solution for HighLoadCup:
 
 #### Stack:
-* Scala 2.12.3, SBT 1.0.0
-* Akka HTTP 10.0.9
-* Slick 3.2.1 (for BD - PostgreSQL 9.6)
-* MacWire (for DI)
+* SBT 1.0.1
+* Scala 2.12.3
+* Akka 2.4.19
+* Akka HTTP 10.0.10
+* Spray-JSON 1.3.3
+* Slick 3.2.1
+* HSQLDB 2.4.0
+* MacWire 2.3.0
 
 #### TODO for complete:
 * Validation
-* Dockerfile (ubuntu, jdk, scala, sbt, postgres)
-* Load initial data with flag: isArchive
+* Dockerfile (ubuntu, jdk, scala, sbt)
