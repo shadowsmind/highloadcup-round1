@@ -22,7 +22,8 @@ package object config {
   )
 
   case class Storage(
-    archivePath: String
+    dataPath: String,
+    isZip:    Boolean
   )
 
 }

@@ -3,6 +3,7 @@ package com.shadowsmind.services
 import java.sql.Timestamp
 
 import akka.actor.ActorSystem
+import com.shadowsmind.api.directives.VisitsRequestParams
 import com.shadowsmind.models.{ Visit, VisitUpdateDto }
 import com.shadowsmind.persistence.{ LocationRepository, UserRepository, VisitRepository }
 
@@ -38,24 +39,20 @@ class VisitService(
     }
   }
 
-  def find(
-    userId:   Long,
-    fromDate: Option[Timestamp], toDate: Option[Timestamp],
-    country: Option[String], toDistance: Option[Long]
-  ): ServiceResult[Seq[Visit]] = {
+  def find(userId: Long, params: VisitsRequestParams): ServiceResult[Seq[Visit]] = {
     UserRepository.exists(userId).flatMap {
       case true ⇒
         val findResult =
-          if (fromDate.isEmpty && toDate.isEmpty && country.isEmpty && toDistance.isEmpty) {
+          if (params.fromDate.isEmpty && params.toDate.isEmpty && params.country.isEmpty && params.toDistance.isEmpty) {
             VisitRepository.findByUser(userId)
-          } else if (country.isEmpty && toDistance.isEmpty) {
-            VisitRepository.findByUserAndDate(userId, fromDate, toDate)
+          } else if (params.country.isEmpty && params.toDistance.isEmpty) {
+            VisitRepository.findByUserAndDate(userId, params.fromDate, params.toDate)
           } else {
-            LocationRepository.findIdsByGeo(country, toDistance).flatMap {
+            LocationRepository.findIdsByGeo(params.country, params.toDistance).flatMap {
               case Nil ⇒ async(Seq.empty[Visit])
 
               case locationsIds ⇒
-                VisitRepository.findByUserAndLocationsAndDate(userId, locationsIds, fromDate, toDate)
+                VisitRepository.findByUserAndLocationsAndDate(userId, locationsIds, params.fromDate, params.toDate)
             }
           }
 

@@ -3,6 +3,7 @@ package com.shadowsmind.services
 import java.sql.Timestamp
 
 import akka.actor.ActorSystem
+import com.shadowsmind.api.directives.LocationAvgRequestParams
 import com.shadowsmind.models.UserGender.UserGender
 import com.shadowsmind.models.{ Location, LocationUpdateDto, Visit }
 import com.shadowsmind.persistence.{ LocationRepository, UserRepository, VisitRepository }
@@ -40,11 +41,7 @@ class LocationService(
     }
   }
 
-  def getMarksAvg(
-    id:       Long,
-    fromDate: Option[Timestamp], toDate: Option[Timestamp],
-    fromAge: Option[Int], toAge: Option[Int], gender: Option[UserGender]
-  ): ServiceResult[Double] = {
+  def getMarksAvg(id: Long, params: LocationAvgRequestParams): ServiceResult[Double] = {
 
     def calculateMarksAvg(visits: Seq[Visit]): Option[Double] = {
       if (visits.isEmpty) {
@@ -58,21 +55,21 @@ class LocationService(
     LocationRepository.exists(id).flatMap {
       case true ⇒
         val avgResult =
-          if (fromDate.isEmpty && toDate.isEmpty && fromAge.isEmpty && toAge.isEmpty && gender.isEmpty) {
+          if (params.fromDate.isEmpty && params.toDate.isEmpty && params.fromAge.isEmpty && params.toAge.isEmpty && params.gender.isEmpty) {
             VisitRepository.findByLocation(id)
               .map(calculateMarksAvg)
-          } else if (fromAge.isEmpty && toAge.isEmpty && gender.isEmpty) {
-            VisitRepository.findByLocationAndDate(id, fromDate, toDate)
+          } else if (params.fromAge.isEmpty && params.toAge.isEmpty && params.gender.isEmpty) {
+            VisitRepository.findByLocationAndDate(id, params.fromDate, params.toDate)
               .map(calculateMarksAvg)
           } else {
-            val fromBirthday = fromAge.map(DateHelper.yearsAgo)
-            val toBirthday = toAge.map(DateHelper.yearsAgo)
-            UserRepository.findIdsByBirthdayAndGender(fromBirthday, toBirthday, gender)
+            val fromBirthday = params.fromAge.map(DateHelper.yearsAgo)
+            val toBirthday = params.toAge.map(DateHelper.yearsAgo)
+            UserRepository.findIdsByBirthdayAndGender(fromBirthday, toBirthday, params.gender)
               .flatMap {
                 case Nil ⇒ async(Some(0.0))
 
                 case usersIds ⇒
-                  VisitRepository.findByLocationAndUsersAndDate(id, usersIds, fromDate, toDate)
+                  VisitRepository.findByLocationAndUsersAndDate(id, usersIds, params.fromDate, params.toDate)
                     .map(calculateMarksAvg)
               }
           }

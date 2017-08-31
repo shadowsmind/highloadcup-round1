@@ -30,7 +30,7 @@ object Server extends App {
 
   val apiRouter = wire[ApiRouter]
 
-  DataLoader.load(config.storage.archivePath)
+  DataLoader.load(config.storage.dataPath, config.storage.isZip)
 
   WebServer(apiRouter.route())
     .startServer(config.server.host, config.server.port, ServerSettings(actorSystem), actorSystem)

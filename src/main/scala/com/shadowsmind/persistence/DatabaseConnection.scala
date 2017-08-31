@@ -1,13 +1,10 @@
 package com.shadowsmind.persistence
 
-import com.github.tminglei.slickpg._
 import com.shadowsmind.config.ConfigKeeper
-import com.shadowsmind.models.UserGender
 import com.zaxxer.hikari.{ HikariConfig, HikariDataSource }
+import slick.jdbc.HsqldbProfile
 
-trait DatabaseConnection extends ExPostgresProfile
-  with PgEnumSupport
-  with PgDateSupport {
+trait DatabaseConnection extends HsqldbProfile {
 
   private val config = ConfigKeeper.appConfig.database
 
@@ -23,12 +20,6 @@ trait DatabaseConnection extends ExPostgresProfile
   override val api: API = new API {}
 
   val DB: backend.DatabaseDef = api.Database.forDataSource(dataSource, Some(config.maxConnections))
-
-  trait API extends super.API with EnumApi {}
-
-  trait EnumApi { this: API ⇒
-    implicit val userGenderMapper = createEnumJdbcType("user_gender", UserGender)
-  }
 
 }
 

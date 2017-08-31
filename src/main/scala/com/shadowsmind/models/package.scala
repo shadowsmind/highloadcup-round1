@@ -9,12 +9,14 @@ package object models {
     val m, f = Value
   }
 
+  import UserGender.UserGender
+
   case class User(
     id:        Long, // уникальный внешний id. Устанавливается тестирующей системой. 32-разрядное целое беззнаковоее число.
     email:     String, // адрес электронной почты пользователя. Тип - unicode-строка длиной до 100 символов. Уникальное поле.
     firstName: String, // имя. Тип - unicode-строки длиной до 50 символов.
     lastName:  String, // фамилия соответственно. Тип - unicode-строки длиной до 50 символов.
-    gender:    UserGender.UserGender, // unicode-строка m означает мужской пол, а f - женский.
+    gender:    UserGender, // unicode-строка m означает мужской пол, а f - женский.
     birthDate: Timestamp // дата рождения, записанная как число секунд от начала UNIX-эпохи по UTC (другими словами - это timestamp).
   ) {
     def update(dto: UserUpdateDto): User = this.copy(
@@ -30,7 +32,7 @@ package object models {
     email:     String,
     firstName: String,
     lastName:  String,
-    gender:    UserGender.UserGender,
+    gender:    UserGender,
     birthDate: Timestamp
   )
 

@@ -2,15 +2,18 @@ package com.shadowsmind.persistence
 
 import java.sql.Timestamp
 
-import com.shadowsmind.models.User
+import com.shadowsmind.models.{ User, UserGender }
 import DatabaseConnection.api._
 import DatabaseConnection.{ DB, OptionalFilter }
 import com.shadowsmind.models.UserGender.UserGender
+import slick.jdbc.JdbcType
 import slick.lifted.ProvenShape
 
 import scala.concurrent.Future
 
 object UserRepository extends BaseRepository[User, UserTable](TableQuery[UserTable]) {
+
+  import UserTableMappers._
 
   def byBirthdayAndGenderFilter(from: Option[Timestamp], to: Option[Timestamp], gender: Option[UserGender]): Query[UserTable, User, Seq] =
     OptionalFilter(entities)
@@ -33,6 +36,8 @@ object UserRepository extends BaseRepository[User, UserTable](TableQuery[UserTab
 
 class UserTable(tag: Tag) extends BaseTable[User](tag, "users") {
 
+  import UserTableMappers._
+
   // format: OFF
   def email     = column[String]("email")
   def firstName = column[String]("first_name")
@@ -43,5 +48,14 @@ class UserTable(tag: Tag) extends BaseTable[User](tag, "users") {
 
   override def * : ProvenShape[User] =
     (id, email, firstName, lastName, gender, birthDate) <> (User.tupled, User.unapply)
+
+}
+
+object UserTableMappers {
+
+  implicit val GenderMapper: JdbcType[UserGender] = MappedColumnType.base[UserGender, String](
+    e ⇒ e.toString,
+    s ⇒ UserGender.withName(s)
+  )
 
 }

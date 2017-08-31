@@ -23,10 +23,9 @@ val macWireVersion        = "2.3.0"
 val typesafeConfigVersion = "1.3.1"
 val pureConfigVersion     = "0.7.2"
 val betterFilesVersion    = "3.1.0"
-val postgresDriverVersion = "42.1.4"
+val hsqldbVersion         = "2.4.0"
 val hikariCPVersion       = "2.6.3"
 val flyWayVersion         = "4.2.0"
-val slickVersion          = "3.2.1"
 val slickPgVersion        = "0.15.3"
 
 val dependencies = Seq(
@@ -36,13 +35,11 @@ val dependencies = Seq(
   "com.typesafe"             %  "config"               % typesafeConfigVersion,
   "com.github.pureconfig"    %% "pureconfig"           % pureConfigVersion,
   "com.github.pathikrit"     %% "better-files"         % betterFilesVersion,
-  "org.postgresql"           %  "postgresql"           % postgresDriverVersion,
+  "org.hsqldb"               %  "hsqldb"               % hsqldbVersion,
   "com.zaxxer"               %  "HikariCP"             % hikariCPVersion,
   "org.flywaydb"             %  "flyway-core"          % flyWayVersion,
-  "com.typesafe.slick"       %% "slick"                % slickVersion,
   "com.github.tminglei"      %% "slick-pg"             % slickPgVersion,
-  "com.github.tminglei"      %% "slick-pg_spray-json"  % slickPgVersion,
-  "com.typesafe.slick"       %% "slick-hikaricp"       % slickVersion
+  "com.github.tminglei"      %% "slick-pg_spray-json"  % slickPgVersion
 )
 
 lazy val root = (project in file("."))

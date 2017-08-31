@@ -13,6 +13,7 @@ object DatabaseSchemeMigration {
     Try(flyway.migrate()) match {
       case Success(c) ⇒
         println(s"Migrated $c scripts")
+
       case Failure(e) ⇒
         println(s"Migration failure: ${e.getMessage}")
         onFailure()
