@@ -24,7 +24,7 @@ val typesafeConfigVersion = "1.3.1"
 val pureConfigVersion     = "0.8.0"
 val betterFilesVersion    = "3.1.0"
 val hsqldbVersion         = "2.4.0"
-val hikariCPVersion       = "2.6.3"
+val hikariCPVersion       = "2.7.0"
 val flyWayVersion         = "4.2.0"
 val slickPgVersion        = "0.15.3"
 
