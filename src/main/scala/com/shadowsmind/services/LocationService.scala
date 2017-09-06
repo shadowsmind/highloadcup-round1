@@ -1,10 +1,7 @@
 package com.shadowsmind.services
 
-import java.sql.Timestamp
-
 import akka.actor.ActorSystem
 import com.shadowsmind.api.directives.LocationAvgRequestParams
-import com.shadowsmind.models.UserGender.UserGender
 import com.shadowsmind.models.{ Location, LocationUpdateDto, Visit }
 import com.shadowsmind.persistence.{ LocationRepository, UserRepository, VisitRepository }
 import com.shadowsmind.utils.DateHelper
@@ -18,19 +15,29 @@ class LocationService(
 ) {
 
   def create(location: Location): ServiceResult[Unit] = {
-    LocationRepository.findOne(location.id).flatMap {
-      case Some(_) ⇒ async(error(400))
-      case None    ⇒ LocationRepository.save(location).mapToUnit
+    LocationRepository.exists(location.id).flatMap {
+      case true  ⇒ async(error(400))
+      case false ⇒ LocationRepository.save(location).mapToUnit
     }
   }
 
   def update(id: Long, dto: LocationUpdateDto): ServiceResult[Unit] = {
-    LocationRepository.findOne(id).flatMap {
-      case Some(location) ⇒
-        val updatedLocation = location.update(dto)
-        LocationRepository.update(id, updatedLocation).mapToUnit
 
-      case None ⇒ async(error(404))
+    def saveUpdates() = {
+      val updatedLocation = Location(
+        id       = id,
+        place    = dto.place,
+        country  = dto.country,
+        city     = dto.city,
+        distance = dto.distance
+      )
+
+      LocationRepository.update(id, updatedLocation).mapToUnit
+    }
+
+    LocationRepository.exists(id).flatMap {
+      case true  ⇒ saveUpdates()
+      case false ⇒ async(error(404))
     }
   }
 

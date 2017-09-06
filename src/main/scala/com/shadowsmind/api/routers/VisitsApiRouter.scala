@@ -6,6 +6,7 @@ import akka.http.scaladsl.server.Directives._
 import com.shadowsmind.api.directives.CommonDirectives
 import com.shadowsmind.models.{ Visit, VisitUpdateDto }
 import com.shadowsmind.api.protocol.ApiJsonProtocol
+import com.shadowsmind.api.validation.VisitValidator
 import com.shadowsmind.services.VisitService
 
 class VisitsApiRouter(visitService: VisitService) {
@@ -22,7 +23,7 @@ class VisitsApiRouter(visitService: VisitService) {
             case Left(error)  ⇒ complete(StatusCode.int2StatusCode(error))
           }
         } ~
-        CommonDirectives.postDto(as[VisitUpdateDto]) { dto ⇒
+        CommonDirectives.postDto(as[VisitUpdateDto], VisitValidator.validate) { dto ⇒
           onSuccess(visitService.update(id, dto)) {
             case Right(_)    ⇒ complete(ApiJsonProtocol.EmptyBody)
             case Left(error) ⇒ complete(StatusCode.int2StatusCode(error))
@@ -31,7 +32,7 @@ class VisitsApiRouter(visitService: VisitService) {
       }
     } ~
     path("new") {
-      CommonDirectives.postDto(as[Visit]) { visit ⇒
+      CommonDirectives.postDto(as[Visit], VisitValidator.validate) { visit ⇒
         onSuccess(visitService.create(visit)) {
           case Right(_)    ⇒ complete(ApiJsonProtocol.EmptyBody)
           case Left(error) ⇒ complete(StatusCode.int2StatusCode(error))

@@ -13,7 +13,15 @@ object CommonDirectives {
   import ApiJsonProtocol._
 
   // TODO: add validation with function as param
-  def postDto[T](um: FromRequestUnmarshaller[T]): Directive1[T] = post & entity(um)
+  def postDto[T](um: FromRequestUnmarshaller[T], validate: T ⇒ Boolean): Directive1[T] = {
+    (post & entity(um)).flatMap { dto ⇒
+      if (validate(dto)) {
+        provide(dto)
+      } else {
+        reject(ValidationRejection("invalid data"))
+      }
+    }
+  }
 
   def locationAvgParams(): Directive1[LocationAvgRequestParams] = {
     parameters('fromDate.as[Timestamp].?, 'toDate.as[Timestamp].?, 'fromAge.as[Int].?, 'toAge.as[Int].?, 'gender.as[UserGender].?)

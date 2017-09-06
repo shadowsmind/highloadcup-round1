@@ -22,6 +22,16 @@ object UserRepository extends BaseRepository[User, UserTable](TableQuery[UserTab
       .filter(gender)(g ⇒ u ⇒ u.gender === g)
       .query
 
+  def existsByIdOrEmail(id: Long, email: String): Future[Boolean] =
+    DB.run {
+      entities.filter(u ⇒ (u.id === id) || (u.email === email)).exists.result
+    }
+
+  def findByIdOrEmail(id: Long, email: String): Future[Seq[User]] =
+    DB.run {
+      entities.filter(u ⇒ (u.id === id) || (u.email === email)).result
+    }
+
   def findByBirthdayAndGender(from: Option[Timestamp], to: Option[Timestamp], gender: Option[UserGender]): Future[Seq[User]] =
     DB.run {
       byBirthdayAndGenderFilter(from, to, gender).result

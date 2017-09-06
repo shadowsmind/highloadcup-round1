@@ -1,7 +1,5 @@
 package com.shadowsmind.services
 
-import java.sql.Timestamp
-
 import akka.actor.ActorSystem
 import com.shadowsmind.api.directives.VisitsRequestParams
 import com.shadowsmind.models.{ Visit, VisitUpdateDto }
@@ -16,19 +14,50 @@ class VisitService(
 ) {
 
   def create(visit: Visit): ServiceResult[Unit] = {
-    VisitRepository.findOne(visit.id).flatMap {
-      case Some(_) ⇒ async(error(400))
-      case None    ⇒ VisitRepository.save(visit).mapToUnit
+    val existsResult = VisitRepository.exists(visit.id)
+    val userExistsResult = UserRepository.exists(visit.user)
+    val locationExistsResult = LocationRepository.exists(visit.location)
+
+    val checkResult = for {
+      exists ← existsResult
+      userExists ← userExistsResult
+      locationExists ← locationExistsResult
+    } yield !exists && userExists && locationExists
+
+    checkResult.flatMap {
+      case true  ⇒ VisitRepository.save(visit).mapToUnit
+      case false ⇒ async(error(400))
     }
   }
 
   def update(id: Long, dto: VisitUpdateDto): ServiceResult[Unit] = {
-    VisitRepository.findOne(id).flatMap {
-      case Some(visit) ⇒
-        val updatedVisit = visit.update(dto)
-        VisitRepository.update(id, updatedVisit).mapToUnit
 
-      case None ⇒ async(error(404))
+    def saveUpdates() = {
+      val updatedVisit = Visit(
+        id        = id,
+        location  = dto.location,
+        user      = dto.user,
+        visitedAt = dto.visitedAt,
+        mark      = dto.mark
+      )
+
+      VisitRepository.update(id, updatedVisit).mapToUnit
+    }
+
+    val existsResult = VisitRepository.exists(id)
+    val userExistsResult = UserRepository.exists(dto.user)
+    val locationExistsResult = LocationRepository.exists(dto.location)
+
+    val checkResult = for {
+      exists ← existsResult
+      userExists ← userExistsResult
+      locationExists ← locationExistsResult
+    } yield (exists, userExists && locationExists)
+
+    checkResult.flatMap {
+      case (true, true)  ⇒ saveUpdates()
+      case (false, _)    ⇒ async(error(404))
+      case (true, false) ⇒ async(error(400))
     }
   }
 

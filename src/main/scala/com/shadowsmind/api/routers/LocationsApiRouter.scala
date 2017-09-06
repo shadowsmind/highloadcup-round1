@@ -5,6 +5,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import com.shadowsmind.api.directives.CommonDirectives
 import com.shadowsmind.api.protocol.{ ApiJsonProtocol, LocationMarksAvg }
+import com.shadowsmind.api.validation.LocationValidator
 import com.shadowsmind.models.{ Location, LocationUpdateDto }
 import com.shadowsmind.services.LocationService
 
@@ -22,7 +23,7 @@ class LocationsApiRouter(locationService: LocationService) {
             case Left(error)  ⇒ complete(StatusCode.int2StatusCode(error))
           }
         } ~
-        CommonDirectives.postDto(as[LocationUpdateDto]) { dto ⇒
+        CommonDirectives.postDto(as[LocationUpdateDto], LocationValidator.validate) { dto ⇒
           onSuccess(locationService.update(id, dto)) {
             case Right(_)    ⇒ complete(ApiJsonProtocol.EmptyBody)
             case Left(error) ⇒ complete(StatusCode.int2StatusCode(error))
@@ -41,7 +42,7 @@ class LocationsApiRouter(locationService: LocationService) {
       }
     } ~
     path("new") {
-      CommonDirectives.postDto(as[Location]) { location ⇒
+      CommonDirectives.postDto(as[Location], LocationValidator.validate) { location ⇒
         onSuccess(locationService.create(location)) {
           case Right(_)    ⇒ complete(ApiJsonProtocol.EmptyBody)
           case Left(error) ⇒ complete(StatusCode.int2StatusCode(error))

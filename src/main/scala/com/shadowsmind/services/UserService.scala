@@ -13,19 +13,40 @@ class UserService(
 ) {
 
   def create(user: User): ServiceResult[Unit] = {
-    UserRepository.findOne(user.id).flatMap {
-      case Some(_) ⇒ async(error(400))
-      case None    ⇒ UserRepository.save(user).mapToUnit
+    UserRepository.existsByIdOrEmail(user.id, user.email).flatMap {
+      case true  ⇒ async(error(400))
+      case false ⇒ UserRepository.save(user).mapToUnit
     }
   }
 
   def update(id: Long, dto: UserUpdateDto): ServiceResult[Unit] = {
-    UserRepository.findOne(id).flatMap {
-      case Some(user) ⇒
-        val updatedUser = user.update(dto)
-        UserRepository.update(id, updatedUser).mapToUnit
 
-      case None ⇒ async(error(404))
+    def updateAndSave(user: User) = {
+      val updatedUser = user.update(dto)
+      UserRepository.update(id, updatedUser).mapToUnit
+    }
+
+    def checkAndUpdate(users: Seq[User]): ServiceResult[Unit] = {
+      users.find(_.id == id) match {
+        case Some(user) ⇒
+          users.find(_.email == dto.email) match {
+            case Some(userSomeEmail) ⇒
+              if (userSomeEmail.id == id) {
+                updateAndSave(user)
+              } else {
+                async(error(400))
+              }
+
+            case None ⇒ updateAndSave(user)
+          }
+
+        case None ⇒ async(error(404))
+      }
+    }
+
+    UserRepository.findByIdOrEmail(id, dto.email).flatMap {
+      case Nil   ⇒ async(error(404))
+      case users ⇒ checkAndUpdate(users)
     }
   }
 

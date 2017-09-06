@@ -23,7 +23,7 @@ object DataLoader {
         File(dataPath)
       }
 
-      val files = directory.list.toSeq
+      val files = directory.list.toSeq.sortBy(_.name)
 
       files.foreach { file ⇒
         if (file.name.contains("options")) {

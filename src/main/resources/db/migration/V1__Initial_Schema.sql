@@ -15,9 +15,7 @@ CREATE TABLE "locations" (
   "place"       LONGVARCHAR NOT NULL,
   "country"     VARCHAR(50) NOT NULL,
   "city"        VARCHAR(50) NOT NULL,
-  "distance"    BIGINT      NOT NULL,
-  "visit_count" BIGINT      DEFAULT 0 NOT NULL,
-  "marks_sum"   BIGINT      DEFAULT 0 NOT NULL
+  "distance"    BIGINT      NOT NULL
 );
 
 CREATE TABLE "visits" (
