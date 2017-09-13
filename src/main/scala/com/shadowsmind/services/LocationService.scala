@@ -23,21 +23,20 @@ class LocationService(
 
   def update(id: Long, dto: LocationUpdateDto): ServiceResult[Unit] = {
 
-    def saveUpdates() = {
-      val updatedLocation = Location(
-        id       = id,
-        place    = dto.place,
-        country  = dto.country,
-        city     = dto.city,
-        distance = dto.distance
+    def updateAndSave(location: Location) = {
+      val updatedLocation = location.copy(
+        place    = dto.place.getOrElse(location.place),
+        country  = dto.country.getOrElse(location.country),
+        city     = dto.city.getOrElse(location.city),
+        distance = dto.distance.getOrElse(location.distance)
       )
 
       LocationRepository.update(id, updatedLocation).mapToUnit
     }
 
-    LocationRepository.exists(id).flatMap {
-      case true  ⇒ saveUpdates()
-      case false ⇒ async(error(404))
+    LocationRepository.findOne(id).flatMap {
+      case Some(location) ⇒ updateAndSave(location)
+      case None           ⇒ async(error(404))
     }
   }
 
@@ -50,12 +49,14 @@ class LocationService(
 
   def getMarksAvg(id: Long, params: LocationAvgRequestParams): ServiceResult[Double] = {
 
-    def calculateMarksAvg(visits: Seq[Visit]): Option[Double] = {
+    def calculateMarksAvg(visits: Seq[Visit]): Double = {
+      import scala.math.BigDecimal.RoundingMode.HALF_UP
+
       if (visits.isEmpty) {
-        Some(0.0)
+        0.0
       } else {
         val markSum = visits.map(_.mark).sum.toDouble
-        Some(markSum / visits.size)
+        BigDecimal(markSum / visits.size).setScale(5, HALF_UP).toDouble
       }
     }
 
@@ -73,7 +74,7 @@ class LocationService(
             val toBirthday = params.toAge.map(DateHelper.yearsAgo)
             UserRepository.findIdsByBirthdayAndGender(fromBirthday, toBirthday, params.gender)
               .flatMap {
-                case Nil ⇒ async(Some(0.0))
+                case Nil ⇒ async(0.0)
 
                 case usersIds ⇒
                   VisitRepository.findByLocationAndUsersAndDate(id, usersIds, params.fromDate, params.toDate)
@@ -81,7 +82,7 @@ class LocationService(
               }
           }
 
-        avgResult.resultOrNotFound
+        avgResult.toResult
 
       case false ⇒ async(error(404))
     }

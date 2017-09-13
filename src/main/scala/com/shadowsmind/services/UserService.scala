@@ -23,11 +23,11 @@ class UserService(
 
     def updateAndSave(user: User) = {
       val updatedUser = user.copy(
-        email     = dto.email,
-        firstName = dto.firstName,
-        lastName  = dto.lastName,
-        gender    = dto.gender,
-        birthDate = dto.birthDate
+        email     = dto.email.getOrElse(user.email),
+        firstName = dto.firstName.getOrElse(user.firstName),
+        lastName  = dto.lastName.getOrElse(user.lastName),
+        gender    = dto.gender.getOrElse(user.gender),
+        birthDate = dto.birthDate.getOrElse(user.birthDate)
       )
 
       UserRepository.update(id, updatedUser).mapToUnit
@@ -51,9 +51,18 @@ class UserService(
       }
     }
 
-    UserRepository.findByIdOrEmail(id, dto.email).flatMap {
-      case Nil   ⇒ async(error(404))
-      case users ⇒ checkAndUpdate(users)
+    dto.email match {
+      case Some(email) ⇒
+        UserRepository.findByIdOrEmail(id, email).flatMap {
+          case Nil   ⇒ async(error(404))
+          case users ⇒ checkAndUpdate(users)
+        }
+      case None ⇒
+        UserRepository.findOne(id).flatMap {
+          case Some(user) ⇒ updateAndSave(user)
+          case None       ⇒ async(error(404))
+        }
+
     }
   }
 
