@@ -8,8 +8,5 @@
 * Spray-JSON 1.3.3
 * Slick 3.2.1
 * HSQLDB 2.4.0
+* HikariCP 2.7.1
 * MacWire 2.3.0
-
-#### TODO for complete:
-* Validation
-* Dockerfile (ubuntu, jdk, scala, sbt)

@@ -5,6 +5,7 @@ import java.nio.file.Files
 
 import better.files._
 import com.shadowsmind.api.protocol._
+import com.shadowsmind.models.{ LocationsDto, UsersDto, VisitsDto }
 import com.shadowsmind.persistence.{ LocationRepository, UserRepository, VisitRepository }
 import spray.json._
 
@@ -33,11 +34,11 @@ object DataLoader {
           val source = new String(Files.readAllBytes(file.path), StandardCharsets.UTF_8)
           val json = source.parseJson
           if (file.name.startsWith("users")) {
-            UserRepository.saveAll(json.convertTo[Users].users)
+            UserRepository.saveAll(json.convertTo[UsersDto].users)
           } else if (file.name.startsWith("locations")) {
-            LocationRepository.saveAll(json.convertTo[Locations].locations)
+            LocationRepository.saveAll(json.convertTo[LocationsDto].locations)
           } else if (file.name.startsWith("visits")) {
-            VisitRepository.saveAll(json.convertTo[Visits].visits)
+            VisitRepository.saveAll(json.convertTo[VisitsDto].visits)
           }
         }
       }

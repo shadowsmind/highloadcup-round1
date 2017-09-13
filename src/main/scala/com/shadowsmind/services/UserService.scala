@@ -22,7 +22,14 @@ class UserService(
   def update(id: Long, dto: UserUpdateDto): ServiceResult[Unit] = {
 
     def updateAndSave(user: User) = {
-      val updatedUser = user.update(dto)
+      val updatedUser = user.copy(
+        email     = dto.email,
+        firstName = dto.firstName,
+        lastName  = dto.lastName,
+        gender    = dto.gender,
+        birthDate = dto.birthDate
+      )
+
       UserRepository.update(id, updatedUser).mapToUnit
     }
 

@@ -1,14 +1,12 @@
 package com.shadowsmind.api.routers
 
-import java.sql.Timestamp
-
 import akka.http.scaladsl.model.StatusCode
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import com.shadowsmind.api.directives.CommonDirectives
-import com.shadowsmind.api.protocol.{ ApiJsonProtocol, Visits }
+import com.shadowsmind.api.protocol.ApiJsonProtocol
 import com.shadowsmind.api.validation.UserValidator
-import com.shadowsmind.models.{ User, UserUpdateDto }
+import com.shadowsmind.models.{ User, UserUpdateDto, UserVisitsDto }
 import com.shadowsmind.services.{ UserService, VisitService }
 
 class UsersApiRouter(userService: UserService, visitService: VisitService) {
@@ -25,7 +23,7 @@ class UsersApiRouter(userService: UserService, visitService: VisitService) {
             case Left(error)  ⇒ complete(StatusCode.int2StatusCode(error))
           }
         } ~
-        CommonDirectives.postDto(as[UserUpdateDto], UserValidator.validate) { dto ⇒
+        CommonDirectives.validDto(as[UserUpdateDto], UserValidator.validate) { dto ⇒
           onSuccess(userService.update(id, dto)) {
             case Right(_)    ⇒ complete(ApiJsonProtocol.EmptyBody)
             case Left(error) ⇒ complete(StatusCode.int2StatusCode(error))
@@ -36,7 +34,7 @@ class UsersApiRouter(userService: UserService, visitService: VisitService) {
         get {
           CommonDirectives.visitParams() { params ⇒
             onSuccess(visitService.find(id, params)) {
-              case Right(value) ⇒ complete(Visits(value))
+              case Right(value) ⇒ complete(UserVisitsDto(value))
               case Left(error)  ⇒ complete(StatusCode.int2StatusCode(error))
             }
           }
@@ -44,7 +42,7 @@ class UsersApiRouter(userService: UserService, visitService: VisitService) {
       }
     } ~
     path("new") {
-      CommonDirectives.postDto(as[User], UserValidator.validate) { user ⇒
+      CommonDirectives.validDto(as[User], UserValidator.validate) { user ⇒
         onSuccess(userService.create(user)) {
           case Right(_)    ⇒ complete(ApiJsonProtocol.EmptyBody)
           case Left(error) ⇒ complete(StatusCode.int2StatusCode(error))

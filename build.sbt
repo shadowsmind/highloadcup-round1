@@ -15,7 +15,7 @@ lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   organization := "com.shadowsmind",
   version := "0.1.0",
   scalaVersion := "2.12.3",
-  scalacOptions ++= List("-unchecked", "-deprecation", "-encoding", "UTF8")
+  scalacOptions ++= List("-unchecked", "-deprecation", "-encoding", "UTF8", "-feature")
 )
 
 val akkaHttpVersion       = "10.0.10"
@@ -24,7 +24,7 @@ val typesafeConfigVersion = "1.3.1"
 val pureConfigVersion     = "0.8.0"
 val betterFilesVersion    = "3.1.0"
 val hsqldbVersion         = "2.4.0"
-val hikariCPVersion       = "2.7.0"
+val hikariCPVersion       = "2.7.1"
 val flyWayVersion         = "4.2.0"
 val slickVersion          = "3.2.1"
 

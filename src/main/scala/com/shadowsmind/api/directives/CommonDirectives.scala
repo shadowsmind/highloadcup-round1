@@ -6,14 +6,15 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server._
 import akka.http.scaladsl.unmarshalling.FromRequestUnmarshaller
 import com.shadowsmind.api.protocol.ApiJsonProtocol
-import com.shadowsmind.models.UserGender.UserGender
+import com.shadowsmind.models.UserGender
+
+import scala.util.{ Failure, Success, Try }
 
 object CommonDirectives {
 
   import ApiJsonProtocol._
 
-  // TODO: add validation with function as param
-  def postDto[T](um: FromRequestUnmarshaller[T], validate: T ⇒ Boolean): Directive1[T] = {
+  def validDto[T](um: FromRequestUnmarshaller[T], validate: T ⇒ Boolean): Directive1[T] = {
     (post & entity(um)).flatMap { dto ⇒
       if (validate(dto)) {
         provide(dto)
@@ -24,10 +25,16 @@ object CommonDirectives {
   }
 
   def locationAvgParams(): Directive1[LocationAvgRequestParams] = {
-    parameters('fromDate.as[Timestamp].?, 'toDate.as[Timestamp].?, 'fromAge.as[Int].?, 'toAge.as[Int].?, 'gender.as[UserGender].?)
+    parameters('fromDate.as[Timestamp].?, 'toDate.as[Timestamp].?, 'fromAge.as[Int].?, 'toAge.as[Int].?, 'gender.as[String].?)
       .tflatMap {
         case (fromDate, toDate, fromAge, toAge, gender) ⇒
-          provide(LocationAvgRequestParams(fromDate, toDate, fromAge, toAge, gender))
+          Try(gender.map(UserGender.withName)) match {
+            case Success(g) ⇒
+              provide(LocationAvgRequestParams(fromDate, toDate, fromAge, toAge, g))
+
+            case Failure(e) ⇒
+              reject(MalformedQueryParamRejection("gender", e.getMessage))
+          }
       }
   }
 

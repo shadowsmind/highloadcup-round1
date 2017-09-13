@@ -26,6 +26,8 @@ trait DatabaseConnection extends HsqldbProfile {
 object DatabaseConnection extends DatabaseConnection {
 
   import slick.lifted.CanBeQueryCondition
+  import scala.language.higherKinds
+
   // optionally filter on a column with a supplied predicate
   case class OptionalFilter[X, Y, C[_]](query: slick.lifted.Query[X, Y, C]) {
     def filter[T, R: CanBeQueryCondition](data: Option[T])(f: T ⇒ X ⇒ R): OptionalFilter[X, Y, C] = {

@@ -23,7 +23,7 @@ class VisitsApiRouter(visitService: VisitService) {
             case Left(error)  ⇒ complete(StatusCode.int2StatusCode(error))
           }
         } ~
-        CommonDirectives.postDto(as[VisitUpdateDto], VisitValidator.validate) { dto ⇒
+        CommonDirectives.validDto(as[VisitUpdateDto], VisitValidator.validate) { dto ⇒
           onSuccess(visitService.update(id, dto)) {
             case Right(_)    ⇒ complete(ApiJsonProtocol.EmptyBody)
             case Left(error) ⇒ complete(StatusCode.int2StatusCode(error))
@@ -32,7 +32,7 @@ class VisitsApiRouter(visitService: VisitService) {
       }
     } ~
     path("new") {
-      CommonDirectives.postDto(as[Visit], VisitValidator.validate) { visit ⇒
+      CommonDirectives.validDto(as[Visit], VisitValidator.validate) { visit ⇒
         onSuccess(visitService.create(visit)) {
           case Right(_)    ⇒ complete(ApiJsonProtocol.EmptyBody)
           case Left(error) ⇒ complete(StatusCode.int2StatusCode(error))

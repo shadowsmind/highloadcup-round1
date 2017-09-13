@@ -4,6 +4,7 @@ import java.sql.Timestamp
 
 package object models {
 
+  // User models
   object UserGender extends Enumeration {
     type UserGender = Value
     val m, f = Value
@@ -26,15 +27,7 @@ package object models {
     lastName:  String, // фамилия соответственно. Тип - unicode-строки длиной до 50 символов.
     gender:    UserGender, // unicode-строка m означает мужской пол, а f - женский.
     birthDate: Timestamp // дата рождения, записанная как число секунд от начала UNIX-эпохи по UTC (другими словами - это timestamp).
-  ) extends UserFields {
-    def update(dto: UserUpdateDto): User = this.copy(
-      email     = dto.email,
-      firstName = dto.firstName,
-      lastName  = dto.lastName,
-      gender    = dto.gender,
-      birthDate = dto.birthDate
-    )
-  }
+  ) extends UserFields
 
   case class UserUpdateDto(
     email:     String,
@@ -44,6 +37,11 @@ package object models {
     birthDate: Timestamp
   ) extends UserFields
 
+  case class UsersDto(
+    users: Seq[User]
+  )
+
+  // Location models
   trait LocationFields {
     val place: String
     val country: String
@@ -66,6 +64,15 @@ package object models {
     distance: Long
   ) extends LocationFields
 
+  case class LocationsDto(
+    locations: Seq[Location]
+  )
+
+  case class LocationMarksAvgDto(
+    avg: Double
+  )
+
+  // Visit models
   trait VisitFields {
     val location: Long
     val user: Long
@@ -87,5 +94,19 @@ package object models {
     visitedAt: Timestamp,
     mark:      Int
   ) extends VisitFields
+
+  case class UserVisit(
+    mark:      Int,
+    visitedAt: Long,
+    place:     String
+  )
+
+  case class VisitsDto(
+    visits: Seq[Visit]
+  )
+
+  case class UserVisitsDto(
+    visits: Seq[UserVisit]
+  )
 
 }

@@ -2,7 +2,7 @@ package com.shadowsmind.services
 
 import akka.actor.ActorSystem
 import com.shadowsmind.api.directives.VisitsRequestParams
-import com.shadowsmind.models.{ Visit, VisitUpdateDto }
+import com.shadowsmind.models.{ UserVisit, Visit, VisitUpdateDto }
 import com.shadowsmind.persistence.{ LocationRepository, UserRepository, VisitRepository }
 
 import scala.concurrent.ExecutionContextExecutor
@@ -68,21 +68,17 @@ class VisitService(
     }
   }
 
-  def find(userId: Long, params: VisitsRequestParams): ServiceResult[Seq[Visit]] = {
+  def find(userId: Long, params: VisitsRequestParams): ServiceResult[Seq[UserVisit]] = {
     UserRepository.exists(userId).flatMap {
       case true ⇒
         val findResult =
-          if (params.fromDate.isEmpty && params.toDate.isEmpty && params.country.isEmpty && params.toDistance.isEmpty) {
-            VisitRepository.findByUser(userId)
-          } else if (params.country.isEmpty && params.toDistance.isEmpty) {
-            VisitRepository.findByUserAndDate(userId, params.fromDate, params.toDate)
-          } else {
-            LocationRepository.findIdsByGeo(params.country, params.toDistance).flatMap {
-              case Nil ⇒ async(Seq.empty[Visit])
+          LocationRepository.findIdsByGeo(params.country, params.toDistance).flatMap {
+            case Nil ⇒ async(Seq.empty[UserVisit])
 
-              case locationsIds ⇒
-                VisitRepository.findByUserAndLocationsAndDate(userId, locationsIds, params.fromDate, params.toDate)
-            }
+            case locationsIds ⇒
+              VisitRepository
+                .findByUserAndLocationsAndDate(userId, locationsIds, params.fromDate, params.toDate)
+                .map(visits ⇒ visits.map(d ⇒ UserVisit(d._1, d._2.getTime, d._3)))
           }
 
         findResult.toResult

@@ -4,9 +4,9 @@ import akka.http.scaladsl.model.StatusCode
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import com.shadowsmind.api.directives.CommonDirectives
-import com.shadowsmind.api.protocol.{ ApiJsonProtocol, LocationMarksAvg }
+import com.shadowsmind.api.protocol.ApiJsonProtocol
 import com.shadowsmind.api.validation.LocationValidator
-import com.shadowsmind.models.{ Location, LocationUpdateDto }
+import com.shadowsmind.models.{ Location, LocationMarksAvgDto, LocationUpdateDto }
 import com.shadowsmind.services.LocationService
 
 class LocationsApiRouter(locationService: LocationService) {
@@ -23,7 +23,7 @@ class LocationsApiRouter(locationService: LocationService) {
             case Left(error)  ⇒ complete(StatusCode.int2StatusCode(error))
           }
         } ~
-        CommonDirectives.postDto(as[LocationUpdateDto], LocationValidator.validate) { dto ⇒
+        CommonDirectives.validDto(as[LocationUpdateDto], LocationValidator.validate) { dto ⇒
           onSuccess(locationService.update(id, dto)) {
             case Right(_)    ⇒ complete(ApiJsonProtocol.EmptyBody)
             case Left(error) ⇒ complete(StatusCode.int2StatusCode(error))
@@ -34,7 +34,7 @@ class LocationsApiRouter(locationService: LocationService) {
         get {
           CommonDirectives.locationAvgParams() { params ⇒
             onSuccess(locationService.getMarksAvg(id, params)) {
-              case Right(value) ⇒ complete(LocationMarksAvg(value))
+              case Right(value) ⇒ complete(LocationMarksAvgDto(value))
               case Left(error)  ⇒ complete(StatusCode.int2StatusCode(error))
             }
           }
@@ -42,7 +42,7 @@ class LocationsApiRouter(locationService: LocationService) {
       }
     } ~
     path("new") {
-      CommonDirectives.postDto(as[Location], LocationValidator.validate) { location ⇒
+      CommonDirectives.validDto(as[Location], LocationValidator.validate) { location ⇒
         onSuccess(locationService.create(location)) {
           case Right(_)    ⇒ complete(ApiJsonProtocol.EmptyBody)
           case Left(error) ⇒ complete(StatusCode.int2StatusCode(error))

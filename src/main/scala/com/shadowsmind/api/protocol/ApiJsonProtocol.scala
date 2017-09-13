@@ -21,18 +21,20 @@ trait ApiJsonProtocol extends DefaultJsonProtocol with SprayJsonSupport {
   // format: OFF
   implicit val userGenderFormat = EnumJsonFormat(UserGender)
   implicit val userFormat       = jsonFormat(User.apply, "id", "email", "first_name", "last_name", "gender", "birth_date")
-  implicit val usersFormat      = jsonFormat1(Users)
+  implicit val usersFormat      = jsonFormat1(UsersDto)
   implicit val userUpdateFormat = jsonFormat(UserUpdateDto.apply, "email", "first_name", "last_name", "gender", "birth_date")
 
   implicit val locationFormat        = jsonFormat5(Location)
-  implicit val locationsFormat       = jsonFormat1(Locations)
-  implicit val locationMarkAvgFormat = jsonFormat1(LocationMarksAvg)
+  implicit val locationsFormat       = jsonFormat1(LocationsDto)
+  implicit val locationMarkAvgFormat = jsonFormat1(LocationMarksAvgDto)
 
   implicit val locationUpdateFormat = jsonFormat4(LocationUpdateDto)
 
   implicit val visitFormat       = jsonFormat(Visit.apply, "id", "location", "user", "visited_at", "mark")
-  implicit val visitsFormat      = jsonFormat1(Visits)
+  implicit val visitsFormat      = jsonFormat1(VisitsDto)
   implicit val visitUpdateFormat = jsonFormat(VisitUpdateDto.apply, "location", "user", "visited_at", "mark")
+  implicit val userVisitFormat   = jsonFormat(UserVisit, "mark", "visited_at", "place")
+  implicit val userVisitsFormat  = jsonFormat1(UserVisitsDto)
   // format: ON
 
 }
